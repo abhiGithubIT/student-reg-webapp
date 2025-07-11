@@ -3,7 +3,7 @@ node {
     stage("git clone") {
         git branch: 'devolopment', credentialsId: 'GitHubcred', url: 'https://github.com/abhiGithubIT/student-reg-webapp.git'
     }
-    stage("maven build") {
+    stage("maven verify and sonar scan") {
         withCredentials([string(credentialsId: 'sonartoken', variable: 'sonartoken')]) {
         sh "${mavenHome}/bin/mvn clean verify sonar:sonar -Dsonar.token=${sonartoken}" 
     }
