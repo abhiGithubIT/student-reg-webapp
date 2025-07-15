@@ -16,14 +16,14 @@ node {
         sshagent(['tomcatcredential']) {
             sh """
                   echo stoping the tomcat service
-                  ssh -o StrictHostKeyChecking=no ec2-user@13.203.97.104 sudo systemctl stop tomcat
+                  ssh -o StrictHostKeyChecking=no ec2-user@13.204.67.112 sudo systemctl stop tomcat
                   sleep 10
                   """
         }
     }
     stage("Deploy war file to tomcat") {
         sshagent(['tomcatcredential']) {
-           sh  "scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@13.203.97.104:/opt/tomcat/webapps/"
+           sh  "scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@13.204.67.112:/opt/tomcat/webapps/"
     }
     }
     
@@ -31,7 +31,7 @@ node {
         sshagent(['tomcatcredential']) {
             sh """
                   echo starting the tomcat service
-                  ssh -o StrictHostKeyChecking=no ec2-user@13.203.97.104 sudo systemctl start tomcat
+                  ssh -o StrictHostKeyChecking=no ec2-user@13.204.67.112 sudo systemctl start tomcat
                   """
     }
     }
