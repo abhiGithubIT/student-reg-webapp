@@ -1,4 +1,5 @@
 node {
+    try {
     def mavenHome = tool name: 'Maven3.9.10', type: 'maven'
     stage("git clone") {
         git branch: 'devolopment', credentialsId: 'GitHubcred', url: 'https://github.com/abhiGithubIT/student-reg-webapp.git'
@@ -35,4 +36,30 @@ node {
                   """
     }
     }
+} 
+    catch (Exception e) {
+        echo "An error occurred: ${e.getMessage()}"
+        currentBuild.result = 'FAILURE'
+    }
+    finally {
+        def buildStatus = currentBuild.result ?: 'SUCCESS'
+        sendEmail(
+            subject: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${buildStatus}",
+            body: "Build ${buildStatus}. Please check the console output at ${env.BUILD_URL}",
+            recipient: 'abhiabhishek299@gmail.com'
+        )
+
+        emailext body: '''Hi Team Build Success Please find the logs using ${env.BUILD_URL}''', subject: '${env.JOB_NAME}- ${env.BUILD_NUMBER}  - ${buildStatus}', to: 'abhiabhishek299@gmail.com'
+    }
+
 }
+
+
+def sendEmail(string subject, string body) {
+    emailext(
+        subject: subject,
+        body: body,
+        to: recipient,
+        mimeType: 'text/html'
+    )
+    }
