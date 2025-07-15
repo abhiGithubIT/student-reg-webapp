@@ -44,12 +44,11 @@ node {
     finally {
         def buildStatus = currentBuild.result ?: 'SUCCESS'
         sendEmail(
-            subject: "${env.JOB_NAME} Build #${env.BUILD_NUMBER} ${buildStatus}",
-            body: "Build ${buildStatus}. Please check the console output at ${env.BUILD_URL}",
-            recipient: "abhiabhishek299@gmail.com"
+             "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${buildStatus}",
+             "Build ${buildStatus}. Please check the console output at ${env.BUILD_URL}",
+             "abhiabhishek299@gmail.com"
         )
 
-        emailext body: '''Hi Team Build Success Please find the logs using ${env.BUILD_URL}''', subject: '${env.JOB_NAME}- ${env.BUILD_NUMBER}  - ${buildStatus}', to: 'abhiabhishek299@gmail.com'
     }
 
 }
@@ -62,4 +61,4 @@ def sendEmail(String subject, String body, String recipient) {
         to: recipient,
         mimeType: 'text/html'
     )
-    }
+}
