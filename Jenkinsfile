@@ -55,7 +55,7 @@ node {
 }
 
 
-def sendEmail(string subject, string body) {
+def sendEmail(String subject, String body) {
     emailext(
         subject: subject,
         body: body,
