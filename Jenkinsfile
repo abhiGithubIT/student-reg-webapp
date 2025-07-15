@@ -1,6 +1,6 @@
 node {
-    try {
     def mavenHome = tool name: 'Maven3.9.10', type: 'maven'
+    try { 
     stage("git clone") {
         git branch: 'devolopment', credentialsId: 'GitHubcred', url: 'https://github.com/abhiGithubIT/student-reg-webapp.git'
     }
@@ -37,7 +37,7 @@ node {
     }
     }
 } 
-    catch (Exception e) {
+    catch (err) {
         echo "An error occurred: ${e.getMessage()}"
         currentBuild.result = 'FAILURE'
     }
