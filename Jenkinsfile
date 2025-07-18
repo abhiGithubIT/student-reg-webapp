@@ -1,9 +1,9 @@
 pipeline {
     agent any
     environment {
-     Sonar_URL = "http://3.110.128.88:9000"
+     Sonar_URL = "http://13.232.48.17:9000"
      SonarToken = credentials("sonartoken")
-     Tomcat_IP = "35.154.205.53"
+     Tomcat_IP = "13.233.158.41"
      }
     tools {
            maven 'Maven3.9.10'
@@ -109,4 +109,3 @@ def sendEmail(String subject, String body, String recipient) {
         mimeType: 'text/html'
     )
 }
-
