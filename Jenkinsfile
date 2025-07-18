@@ -67,16 +67,7 @@ pipeline {
                  }
             }
         }
-        stage("Deploy to QA server") {
-            when {
-                expression { 
-                    branch = 'master'
-                 }
-            }
-            steps{
-                echo "Deploying to QA server"
-            }             
-        }
+        
     } 
 }
 
