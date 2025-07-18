@@ -32,7 +32,7 @@ pipeline {
         stage("Deploy to dev server") {
             when {
                 expression { 
-                    branch = 'development'
+                    branch = 'devolopment'
                  }
             }
              steps{
