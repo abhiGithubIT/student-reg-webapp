@@ -94,11 +94,4 @@ post {
     }
  }
 
-def sendEmail(String subject, String body, String recipient) {
-    emailext(
-        subject: subject,
-        body: body,
-        to: recipient,
-        mimeType: 'text/html'
-    )
-}
+
