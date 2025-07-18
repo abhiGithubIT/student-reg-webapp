@@ -41,7 +41,7 @@ pipeline {
                   echo stoping the Tomcat Process
                   ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl stop tomcat
                   sleep 30
-                  scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@${Tomcat_IP}:/opt/tomcat/webapps/student-reg-webapp.war"
+                  scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@${Tomcat_IP}:/opt/tomcat/webapps/student-reg-webapp.war
                   ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl start tomcat
                   echo starting the tomcat Process
                   """
@@ -60,7 +60,7 @@ pipeline {
                   echo stoping the Tomcat Process
                   ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl stop tomcat
                   sleep 30
-                  scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@${Tomcat_IP}:/opt/tomcat/webapps/student-reg-webapp.war"
+                  scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@${Tomcat_IP}:/opt/tomcat/webapps/student-reg-webapp.war
                   ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl start tomcat
                   echo starting the tomcat Process
                   """
