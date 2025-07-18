@@ -1,64 +1,59 @@
-node {
-    def mavenHome = tool name: 'Maven3.9.10', type: 'maven'
-    try { 
-    stage("git clone") {
-        git branch: 'devolopment', credentialsId: 'GitHubcred', url: 'https://github.com/abhiGithubIT/student-reg-webapp.git'
+pipeline {
+    agent any
+    environment {
+     Sonar_URL = "http://3.110.128.88:9000"
+     SonarToken = credentials("sonartoken")
+     Tomcat_IP = "35.154.205.53"
+     }
+    tools {
+           maven 'Maven3.9.10'
     }
-    stage("maven verify and sonar scan") {
-        withCredentials([string(credentialsId: 'sonartoken', variable: 'sonartoken')]) {
-        sh "${mavenHome}/bin/mvn clean verify sonar:sonar -Dsonar.token=${sonartoken}" 
-    }
-    }
-    stage("maven deploy") {
-        sh "${mavenHome}/bin/mvn  clean  deploy" 
-    }
-    
-    stage("stop tomcat server") {
-        sshagent(['tomcatcredential']) {
-            sh """
-                  echo stoping the tomcat service
-                  ssh -o StrictHostKeyChecking=no ec2-user@13.204.67.112 sudo systemctl stop tomcat
+    stages {
+        stage("Git Clone") {
+            steps{
+             git branch: 'devolopment', credentialsId: 'GitHubcred', url: 'https://github.com/abhiGithubIT/student-reg-webapp.git'
+            }
+        }
+        stage('maven clean package') {
+            steps {
+                  sh "mvn clean package"
+            }
+        }
+        stage("Sonar Scan") {
+            steps{
+                  sh "mvn  clean verify sonar:sonar -Dsonar.url={Sonar_URL} -Dsonar.token=${sonartoken}"
+            }
+        }
+        stage("Uploading The War file to nexus") {
+            steps {
+                sh "mvn clean deploy"
+            }
+        }
+        stage("Stop Tomcat Process") {
+            steps{
+                sshagent(['tomcatcredential']) {
+                sh """
+                  echo stoping the Tomcat Process
+                  ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl stop tomcat
                   sleep 10
                   """
+                 }
+            }
         }
-    }
-    stage("Deploy war file to tomcat") {
-        sshagent(['tomcatcredential']) {
-           sh  "scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@13.204.67.112:/opt/tomcat/webapps/"
-    }
-    }
-    
-    stage("starting tomcat service") {
-        sshagent(['tomcatcredential']) {
-            sh """
-                  echo starting the tomcat service
-                  ssh -o StrictHostKeyChecking=no ec2-user@13.204.67.112 sudo systemctl start tomcat
-                  """
-    }
-    }
-} 
-    catch (err) {
-        echo "An error occurred: ${e.getMessage()}"
-        currentBuild.result = 'FAILURE'
-    }
-    finally {
-        def buildStatus = currentBuild.result ?: 'SUCCESS'
-        sendEmail(
-             "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${buildStatus}",
-             "Build ${buildStatus}. Please check the console output at ${env.BUILD_URL}",
-             "abhiabhishek299@gmail.com"
-        )
-
-    }
-
-}
-
-
-def sendEmail(String subject, String body, String recipient) {
-    emailext(
-        subject: subject,
-        body: body,
-        to: recipient,
-        mimeType: 'text/html'
-    )
-}
+         stage("deplyoing war file to tomcat") {
+              steps{
+                   sshagent(['tomcatcredential']) {
+                    sh "scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@${Tomcat_IP}:/opt/tomcat/webapps/"
+                     }
+              }
+         }
+          stage("Starting The Tomcat Process") {
+              steps{
+                 sshagent(['tomcatcredential']) {
+                  sh """
+                    echo starting the tomcat Process
+                    ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl start tomcat
+                    """
+                    }
+              }
+         }
