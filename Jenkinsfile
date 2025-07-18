@@ -29,7 +29,7 @@ pipeline {
                 sh "mvn clean deploy"
             }
         }
-        stage("Deploy to Dev server") {
+        stage("Deploy to De server") {
             when {
                 expression { 
                     branch = 'feature/login'
