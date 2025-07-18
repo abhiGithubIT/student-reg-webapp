@@ -29,31 +29,84 @@ pipeline {
                 sh "mvn clean deploy"
             }
         }
-        stage("Stop Tomcat Process") {
-            steps{
+        stage("Deploy to Dev server") {
+            when {
+                expression { 
+                    branch = 'feature/login'
+                 }
+            }
+             steps{
                 sshagent(['tomcatcredential']) {
                 sh """
                   echo stoping the Tomcat Process
                   ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl stop tomcat
-                  sleep 10
+                  sleep 30
+                  scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@${Tomcat_IP}:/opt/tomcat/webapps/"
+                  ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl start tomcat
+                  echo starting the tomcat Process
                   """
                  }
             }
         }
-         stage("deplyoing war file to tomcat") {
-              steps{
-                   sshagent(['tomcatcredential']) {
-                    sh "scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@${Tomcat_IP}:/opt/tomcat/webapps/"
-                     }
-              }
-         }
-          stage("Starting The Tomcat Process") {
-              steps{
-                 sshagent(['tomcatcredential']) {
-                  sh """
-                    echo starting the tomcat Process
-                    ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl start tomcat
-                    """
-                    }
-              }
-         }
+        stage("Deploy to Dev server") {
+            when {
+                expression { 
+                    branch = 'devolopment'
+                 }
+            }
+             steps{
+                sshagent(['tomcatcredential']) {
+                sh """
+                  echo stoping the Tomcat Process
+                  ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl stop tomcat
+                  sleep 30
+                  scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@${Tomcat_IP}:/opt/tomcat/webapps/"
+                  ssh -o StrictHostKeyChecking=no ec2-user@${Tomcat_IP} sudo systemctl start tomcat
+                  echo starting the tomcat Process
+                  """
+                 }
+            }
+        }
+        stage("Deploy to QA server") {
+            when {
+                expression { 
+                    branch = 'master'
+                 }
+            }
+            steps{
+                echo "Deploying to QA server"
+            }             
+        }
+    } 
+
+
+post {
+        success {
+            script {
+                sendEmail(
+                    subject: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - SUCCESS",
+                    body: "Build was successful. Please check the console output at ${env.BUILD_URL}",
+                    recipient: 'abhiabhishek299@gmail.com'
+                )
+            }
+        }
+    }
+    failure {
+        script {
+            sendEmail(
+                subject: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - FAILURE",
+                body: "Build failed. Please check the console output at ${env.BUILD_URL}",
+                recipient: 'abhiabhishek299@gmail.com'
+            )
+        }
+    }
+}
+def sendEmail(String subject, String body, String recipient) {
+    emailext(
+        subject: subject,
+        body: body,
+        to: recipient,
+        mimeType: 'text/html'
+    )
+}
+

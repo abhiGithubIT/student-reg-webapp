@@ -1,0 +1,66 @@
+node {
+    try {
+    def mavenHome = tool name: 'Maven3.9.10', type: 'maven'
+    stage("git clone") {
+        git branch: 'devolopment', credentialsId: 'GitHubcred', url: 'https://github.com/abhiGithubIT/student-reg-webapp.git'
+    }
+    stage("maven verify and sonar scan") {
+        withCredentials([string(credentialsId: 'sonartoken', variable: 'sonartoken')]) {
+        sh "${mavenHome}/bin/mvn clean verify sonar:sonar -Dsonar.token=${sonartoken}" 
+    }
+    }
+    stage("maven deploy") {
+        sh "${mavenHome}/bin/mvn  clean  deploy" 
+    }
+    
+    stage("stop tomcat server") {
+        sshagent(['tomcatcredential']) {
+            sh """
+                  echo stoping the tomcat service
+                  ssh -o StrictHostKeyChecking=no ec2-user@13.204.67.112 sudo systemctl stop tomcat
+                  sleep 10
+                  """
+        }
+    }
+    stage("Deploy war file to tomcat") {
+        sshagent(['tomcatcredential']) {
+           sh  "scp -o StrictHostKeyChecking=no target/student-reg-webapp.war ec2-user@13.204.67.112:/opt/tomcat/webapps/"
+    }
+    }
+    
+    stage("starting tomcat service") {
+        sshagent(['tomcatcredential']) {
+            sh """
+                  echo starting the tomcat service
+                  ssh -o StrictHostKeyChecking=no ec2-user@13.204.67.112 sudo systemctl start tomcat
+                  """
+    }
+    }
+} 
+    catch (Exception e) {
+        echo "An error occurred: ${e.getMessage()}"
+        currentBuild.result = 'FAILURE'
+    }
+    finally {
+        def buildStatus = currentBuild.result ?: 'SUCCESS'
+        sendEmail(
+            subject: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${buildStatus}",
+            body: "Build ${buildStatus}. Please check the console output at ${env.BUILD_URL}",
+            recipient: 'abhiabhishek299@gmail.com'
+        )
+
+        emailext body: '''Hi Team Build Success Please find the logs using ${env.BUILD_URL}''', subject: '${env.JOB_NAME}- ${env.BUILD_NUMBER}  - ${buildStatus}', to: 'abhiabhishek299@gmail.com'
+    }
+
+}
+
+
+def sendEmail(string subject, string body String recipient) {
+    emailext(
+        subject: subject,
+        body: body,
+        to: recipient,
+        mimeType: 'text/html'
+    )
+    }
+
