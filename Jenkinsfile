@@ -78,6 +78,7 @@ pipeline {
             }             
         }
     } 
+}
 
 
 post {
@@ -90,7 +91,7 @@ post {
                 )
             }
         }
-    }
+    
     failure {
         script {
             sendEmail(
@@ -100,7 +101,8 @@ post {
             )
         }
     }
-}
+ }
+
 def sendEmail(String subject, String body, String recipient) {
     emailext(
         subject: subject,
