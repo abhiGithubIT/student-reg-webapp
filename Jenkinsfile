@@ -71,5 +71,35 @@ pipeline {
     }
 
 }
+post {
+        success {
+            script {
+                emailext(
+                    subject: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - SUCCESS",
+                    body: "Build was successful. Please check the console output at ${env.BUILD_URL}",
+                    recipient: 'abhiabhishek299@gmail.com'
+                )
+            }
+        }
+    
+    failure {
+        script {
+            emailext(
+                subject: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - FAILURE",
+                body: "Build failed. Please check the console output at ${env.BUILD_URL}",
+                recipient: 'abhiabhishek299@gmail.com'
+            )
+        }
+    }
+ }
+
+def sendEmail(String subject, String body, String recipient) {
+    emailext(
+        subject: subject,
+        body: body,
+        to: recipient,
+        mimeType: 'text/html'
+    )
+}
 
 
