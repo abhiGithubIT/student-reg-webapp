@@ -1,9 +1,9 @@
 pipeline {
     agent any
     environment {
-     Sonar_URL = "http://13.232.48.17:9000"
+     Sonar_URL = "http://3.110.133.51:9000"
      SonarToken = credentials("sonartoken")
-     Tomcat_IP = "13.233.158.41"
+     Tomcat_IP = "13.233.9.125"
      }
     tools {
            maven 'Maven3.9.10'
@@ -29,10 +29,10 @@ pipeline {
                 sh "mvn clean deploy"
             }
         }
-        stage("Deploy to De server") {
+        stage("Deploy to dev server") {
             when {
                 expression { 
-                    branch = 'feature/login'
+                    branch = 'development'
                  }
             }
              steps{
@@ -48,10 +48,10 @@ pipeline {
                  }
             }
         }
-        stage("Deploy to Dev server") {
+        stage("Deploy to feature-login server") {
             when {
                 expression { 
-                    branch = 'devolopment'
+                    branch = 'feature-login'
                  }
             }
              steps{
